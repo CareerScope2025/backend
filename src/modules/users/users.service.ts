@@ -179,7 +179,10 @@ export class UsersService {
       },
     });
     // jobs 배열과 job.jobName을 그대로 비교하여 필터링
-    const jobsData = allJobsData.filter(job => jobs.includes(job.jobName));
+    const jobsData =
+      jobs.length === 0
+        ? allJobsData
+        : allJobsData.filter(job => jobs.includes(job.jobName));
 
     // 4. 결과 조합 (companyId 기준 매칭)
     return jobsData.map(job => {
