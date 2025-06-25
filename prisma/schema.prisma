@@ -39,18 +39,7 @@ model UserInfo {
 model Company {
   id              Int                 @id @default(autoincrement())
   name            String              @unique
-  industry        String?
-  estDate         DateTime?
-  employeeCount   Int?
-  ceo             String?
-  website         String?
   address         String?
-  avgSalary       Float?
-  entrySalary     Float?
-  businessSummary String?
-  benefits        String?
-  history         String?
-  logoUrl         String?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   companyAbility  CompanyAbility?

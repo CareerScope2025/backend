@@ -23,4 +23,12 @@ export class UsersService {
     });
     return userInfo;
   }
+
+  async getUniqueJobs(): Promise<string[]> {
+    const jobs = await this.prismaService.companyJob.findMany({
+      select: { jobName: true },
+      distinct: ['jobName'],
+    });
+    return jobs.map(j => j.jobName);
+  }
 }
