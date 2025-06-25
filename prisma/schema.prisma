@@ -8,164 +8,152 @@ datasource db {
 }
 
 model User {
-  id            Int           @id @default(autoincrement())
-  email         String        @unique
-  name          String
-  password      String?
-  createdAt     DateTime      @default(now())
-  userInfo      UserInfo?
-  reports       Report[]      
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  name            String
+  createdAt       DateTime         @default(now())
+  password        String?
+  reports         Report[]
+  userInfo        UserInfo?
   userPreferences UserPreference[]
 }
 
 /// 가입 시 입력한 스펙
 model UserInfo {
-  id                  Int       @id @default(autoincrement())
-  user                User      @relation(fields: [userId], references: [id])
-  userId              Int       @unique
-  schoolName          String?       
-  schoolScore         Float?     
-  major               String?
-  englishScores       Int?      @default(0)      
-  certificationCount  Int?      @default(0)
-  internshipCount     Int?      @default(0)
-  clubActivityCount   Int?      @default(0)
-  awardsCount         Int?      @default(0)
-  experienceYears     Int?      @default(0)       
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @unique
+  schoolScore        Float?
+  schoolName         String?
+  major              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  certificationCount Int?     @default(0)
+  experienceYears    Int?     @default(0)
+  internshipCount    Int?     @default(0)
+  englishScores      Int?     @default(0)
+  awardsCount        Int?     @default(0)
+  clubActivityCount  Int?     @default(0)
+  user               User     @relation(fields: [userId], references: [id])
 }
 
-/// 회사 규모 ENUM
-enum CompanyScale {
-  대기업
-  중견
-  중소
-  스타트업
-  공기업
-}
 model Company {
-  id                 Int       @id @default(autoincrement())
-  name               String    @unique      // 회사명
-  industry           String?                  // 업종
-  estDate            DateTime?                // 설립일
-  employeeCount      Int?
-  ceo                String?                  // 대표자명
-  website            String?
-  address            String?
-  avgSalary          Float?    // 전체 평균 연봉
-  entrySalary        Float?    // 신입사원 초봉
-  businessSummary    String?   // 사업내용
-  benefits           String?   // 복지_지원금/보험
-  history            String?   // 연혁
-  logoUrl            String?
-  interviews         Interview[]
-  resumeSamples      ResumeSample[]
-  requirements       CompanyRequirement?
-  reports            Report[]
-  companyJobs        CompanyJob[]
-  companyAbility     CompanyAbility?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id              Int                 @id @default(autoincrement())
+  name            String              @unique
+  industry        String?
+  estDate         DateTime?
+  employeeCount   Int?
+  ceo             String?
+  website         String?
+  address         String?
+  avgSalary       Float?
+  entrySalary     Float?
+  businessSummary String?
+  benefits        String?
+  history         String?
+  logoUrl         String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  companyAbility  CompanyAbility?
+  companyJobs     CompanyJob[]
+  requirements    CompanyRequirement?
+  interviews      Interview[]
+  reports         Report[]
+  resumeSamples   ResumeSample[]
 }
 
 model Report {
-  id              Int        @id @default(autoincrement())
-  user            User       @relation(fields: [userId], references: [id])
-  userId          Int
-  company         Company    @relation(fields: [companyId], references: [id])
-  companyId       Int
-  jobRole         String     // 요청 시 지정한 직무
-  createdAt       DateTime   @default(now())
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  companyId Int
+  jobRole   String
+  createdAt DateTime @default(now())
+  sections  Json
+  company   Company  @relation(fields: [companyId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
-  // AI가 생성한 리포트 각 섹션을 JSON으로 보관
-  sections        Json       // {
-                              //   "newYearMessage": "...",
-                              //   "financialStatus": "...",
-                              //   "talentProfile": "...",
-                              //   "specComparison": "...",
-                              //   "interviewGuide": "..."
-                              // }
+  @@index([companyId], map: "Report_companyId_fkey")
+  @@index([userId], map: "Report_userId_fkey")
 }
 
 model Interview {
-  id            Int      @id @default(autoincrement())
-  company       Company  @relation(fields: [companyId], references: [id])
-  companyId     Int
-  jobRole       String?  // 직무명
-  hiringType    String?  // 신입/경력
-  question      String
-  review        String?  // 면접후기
-  process       String?  // 채용과정
-  result        String?  // 면접결과
-  date          DateTime?
-  combinedText  String?  // ("질문+답변" 합친 텍스트)
+  id           Int       @id @default(autoincrement())
+  companyId    Int
+  jobRole      String?
+  hiringType   String?
+  question     String
+  review       String?
+  process      String?
+  result       String?
+  date         DateTime?
+  combinedText String?
+  company      Company   @relation(fields: [companyId], references: [id])
+
+  @@index([companyId], map: "Interview_companyId_fkey")
 }
 
 model ResumeSample {
-  id               Int      @id @default(autoincrement())
-  company          Company  @relation(fields: [companyId], references: [id])
-  companyId        Int
-  universityType   String   // ex. 서울4년, 고졸 등
-  major            String
-  recruitmentTerm  String   // ex. "2023년 하반기"
-  hiringType       String   // 신입/경력
-  jobRole          String
-  gpa              Float
-  englishScores    Int    
-  awardsCnt        Int
-  internshipCnt    Int
-  clubActivityCnt  Int
-  // … 필요시 sample 답변(question/answer) 필드 추가
+  id              Int     @id @default(autoincrement())
+  companyId       Int
+  universityType  String
+  major           String
+  recruitmentTerm String
+  hiringType      String
+  jobRole         String
+  gpa             Float
+  awardsCnt       Int
+  internshipCnt   Int
+  clubActivityCnt Int
+  englishScores   Int
+  company         Company @relation(fields: [companyId], references: [id])
+
+  @@index([companyId], map: "ResumeSample_companyId_fkey")
 }
 
 model CompanyRequirement {
-  id                Int      @id @default(autoincrement())
-  company           Company  @relation(fields: [companyId], references: [id])
-  companyId         Int      @unique
+  id                Int     @id @default(autoincrement())
+  companyId         Int     @unique
   minGpa            Float?
   minEnglishScores  Json?
   minCertifications Int?
   minInternships    Int?
-  // resumeSamples 에서 통계(최소, 25/50/75 백분위 등)로 집계
+  company           Company @relation(fields: [companyId], references: [id])
 }
 
-// === 회사별 직무/담당업무/연봉/인재상/특성 ===
 model CompanyJob {
-  id        Int      @id @default(autoincrement())
-  company   Company  @relation(fields: [companyId], references: [id])
+  id        Int     @id @default(autoincrement())
   companyId Int
-  jobName   String   // 직무명
-  task      String   @db.Text
-  salary    Float?   // 연봉
-  vision    String?  @db.Text
-  traits    Float?   // 워라밸/성장 등 특성 (0~1)
-  scale     Float?   // 회사 규모 (0~1)
+  jobName   String
+  task      String  @db.Text
+  salary    Float?
+  vision    String? @db.Text
+  traits    Float?
+  scale     Float?
+  company   Company @relation(fields: [companyId], references: [id])
 
   @@unique([companyId, jobName])
 }
 
-// === 회사별 평균 스펙 통계 ===
 model CompanyAbility {
-  id               Int      @id @default(autoincrement())
-  company          Company  @relation(fields: [companyId], references: [id])
-  companyId        Int      @unique
+  id               Int     @id @default(autoincrement())
+  companyId        Int     @unique
   gpa              Float?
   certificationCnt Float?
   awardsCnt        Float?
   internshipCnt    Float?
   clubActivityCnt  Float?
-  englishScores    Int?  
+  englishScores    Int?
+  company          Company @relation(fields: [companyId], references: [id])
 }
 
-// === 유저의 검색/선호 조건 이력 ===
 model UserPreference {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
   userId    Int
   salary    Float?
-  jobs      Json?    // ["데이터 분석가", ...]
+  jobs      Json?
   traits    Float?
   scale     Float?
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "UserPreference_userId_fkey")
 }
