@@ -14,7 +14,7 @@ model User {
   password      String?
   createdAt     DateTime      @default(now())
   userInfo      UserInfo?
-  reports       Report[]      // 사용자가 요청한 리포트 이력
+  reports       Report[]      
   userPreferences UserPreference[]
 }
 
@@ -23,13 +23,13 @@ model UserInfo {
   id                  Int       @id @default(autoincrement())
   user                User      @relation(fields: [userId], references: [id])
   userId              Int       @unique
-  schoolName          String    // ex. 서울4년…
-  schoolScore         Float     // GPA
-  major               String
-  englishScores       Int      
-  certificationCount  Int
-  internshipCount     Int
-  experienceYears     Int       // 0이면 신입, N>0이면 경력
+  schoolName          String?       
+  schoolScore         Float?     
+  major               String?
+  englishScores       Int?      @default(0)      
+  certificationCount  Int?      @default(0)
+  internshipCount     Int?      @default(0)
+  experienceYears     Int?      @default(0)       
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 }

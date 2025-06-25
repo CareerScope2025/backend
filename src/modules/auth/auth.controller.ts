@@ -24,7 +24,7 @@ export class AuthController {
     );
     return {
       message: '일반 회원가입 성공',
-      data: result,
+      user: result,
     };
   }
 

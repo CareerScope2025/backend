@@ -19,7 +19,7 @@ export class S3Service {
     prefix?: string
   ): Promise<string> {
     try {
-      const filePrefix = prefix || 'career-scope/profile';
+      const filePrefix = prefix || 'career-scope/';
       const fileName = `${filePrefix}_${crypto.randomUUID()}.${fileType}`;
       const uploadResult = await this.s3
         .upload({
