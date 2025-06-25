@@ -29,6 +29,8 @@ model UserInfo {
   englishScores       Int?      @default(0)      
   certificationCount  Int?      @default(0)
   internshipCount     Int?      @default(0)
+  clubActivityCount   Int?      @default(0)
+  awardsCount         Int?      @default(0)
   experienceYears     Int?      @default(0)       
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt

@@ -6,7 +6,21 @@ import { SurveyDto } from './dto/survey.dto';
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  //   async survey(surveyDto: SurveyDto) {
-  //     const user = await this.prismaService.user.create({
-  //   }
+  async survey(surveyDto: SurveyDto, userId: number) {
+    const userInfo = await this.prismaService.userInfo.create({
+      data: {
+        userId,
+        schoolName: surveyDto.schoolName,
+        schoolScore: surveyDto.gpa,
+        major: null,
+        englishScores: surveyDto.englishScores,
+        certificationCount: surveyDto.certificationCount,
+        internshipCount: surveyDto.internshipCount,
+        clubActivityCount: surveyDto.clubActivityCount,
+        awardsCount: surveyDto.awardsCount,
+        experienceYears: surveyDto.experienceYears,
+      },
+    });
+    return userInfo;
+  }
 }
