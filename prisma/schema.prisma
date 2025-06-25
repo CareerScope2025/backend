@@ -44,7 +44,6 @@ model Company {
   updatedAt       DateTime            @updatedAt
   companyAbility  CompanyAbility?
   companyJobs     CompanyJob[]
-  requirements    CompanyRequirement?
   interviews      Interview[]
   reports         Report[]
   resumeSamples   ResumeSample[]
@@ -97,17 +96,6 @@ model ResumeSample {
 
   @@index([companyId], map: "ResumeSample_companyId_fkey")
 }
-
-model CompanyRequirement {
-  id                Int     @id @default(autoincrement())
-  companyId         Int     @unique
-  minGpa            Float?
-  minEnglishScores  Json?
-  minCertifications Int?
-  minInternships    Int?
-  company           Company @relation(fields: [companyId], references: [id])
-}
-
 model CompanyJob {
   id        Int     @id @default(autoincrement())
   companyId Int

@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { MainService } from '@src/main/main.service';
 import { UserPreferenceDto } from './dto/userPreference.dto';
 import { GetUser } from '@src/modules/auth/decorators/get-user.decorator';
+import { UserAbilityDto } from './dto/userAbility.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
 export class MainController {
@@ -13,6 +15,7 @@ export class MainController {
   }
 
   @Post('user-preference')
+  @UseGuards(AuthGuard('jwt'))
   async setUserPreference(
     @Body() userPreferenceDto: UserPreferenceDto,
     @GetUser() user: any
