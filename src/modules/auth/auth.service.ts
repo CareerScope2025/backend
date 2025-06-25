@@ -2,6 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { AuthUserDto } from './dto/auth-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -10,63 +11,6 @@ export class AuthService {
     private readonly prisma: PrismaService
   ) {}
 
-  // auth.service.ts
-  async handleGoogleCallback(
-    payload: AuthUserDto & {
-      googleAccessToken: string;
-      googleRefreshToken: string;
-    }
-  ) {
-    const {
-      email,
-      name,
-      profileImageUrl,
-      authProvider,
-      googleAccessToken,
-      googleRefreshToken,
-    } = payload;
-
-    const dataToSave: any = {
-      googleAccessToken,
-      googleTokenExpiry: new Date(Date.now() + 3600 * 1000),
-      lastLogin: new Date(),
-    };
-    if (googleRefreshToken) {
-      dataToSave.googleRefreshToken = googleRefreshToken;
-    }
-    console.log('googleAccessToken', googleAccessToken);
-    console.log('googleRefreshToken', googleRefreshToken);
-    // 1) DB에서 유저 조회
-    let user = await this.prisma.user.findUnique({ where: { email } });
-
-    // 2) 없으면 생성, 있으면 토큰만 갱신
-    if (user) {
-      user = await this.prisma.user.update({
-        where: { id: user.id },
-        data: dataToSave,
-      });
-    } else {
-      user = await this.prisma.user.create({
-        data: {
-          email,
-          name,
-          profileImageUrl,
-          authProvider,
-          ...dataToSave,
-        },
-      });
-    }
-
-    // 3) 우리 서비스 JWT 발급 (7일짜리)
-    const jwtPayload = { userId: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(jwtPayload, {
-      expiresIn: '7d',
-      secret: process.env.ACCESS_TOKEN_SECRET,
-    });
-
-    return { user, accessToken };
-  }
-
   // 회원가입 로직
   async signup(email: string, name: string, password: string) {
     // 이메일 중복 확인
@@ -74,16 +18,19 @@ export class AuthService {
       where: { email },
     });
     if (existingUserByEmail) {
-      throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '이미 존재하는 이메일입니다.',
+        HttpStatus.BAD_REQUEST
+      );
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // 새로운 사용자 생성
     const newUser = await this.prisma.user.create({
       data: {
         email,
         name,
-        password,
-        authProvider: 'default',
+        password: hashedPassword,
       },
     });
 
@@ -100,7 +47,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
-    if (!user || user.password !== password) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new HttpException(
         '유효하지 않는 이메일 혹은 비밀번호 입니다',
         HttpStatus.FORBIDDEN
@@ -121,8 +68,6 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       name: user.name,
-      profileImageUrl: user.profileImageUrl,
-      authProvider: user.authProvider,
     };
   }
 
@@ -147,8 +92,6 @@ export class AuthService {
       data: {
         email: profile.email,
         name: profile.name,
-        profileImageUrl: profile.profileImageUrl,
-        authProvider: profile.authProvider,
       },
     });
   }
